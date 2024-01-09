@@ -373,7 +373,6 @@ bool WiFiSTAClass::disconnect(bool wifioff, bool eraseap)
     wifi_sta_config(&conf);
 
     if(WiFi.getMode() & WIFI_MODE_STA){
-        _useStaticIp = false;
         if(eraseap){
             if(esp_wifi_set_config((wifi_interface_t)ESP_IF_WIFI_STA, &conf)){
                 log_e("clear config failed!");
@@ -429,6 +428,26 @@ bool WiFiSTAClass::config(IPAddress local_ip, IPAddress gateway, IPAddress subne
     }
     _useStaticIp = err == ESP_OK;
     return err == ESP_OK;
+}
+
+/**
+ * Sets the working bandwidth of the STA mode
+ * @param m wifi_bandwidth_t
+ */
+bool WiFiSTAClass::bandwidth(wifi_bandwidth_t bandwidth) {
+    if(!WiFi.enableSTA(true)) {
+        log_e("STA enable failed!");
+        return false;
+    }
+
+    esp_err_t err;
+    err = esp_wifi_set_bandwidth((wifi_interface_t)ESP_IF_WIFI_STA, bandwidth);
+    if(err){
+        log_e("Could not set STA bandwidth!");
+        return false;
+    }
+
+    return true;
 }
 
 /**
